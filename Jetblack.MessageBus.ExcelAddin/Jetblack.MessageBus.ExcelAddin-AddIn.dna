@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DnaLibrary Name="MessageBus Add-In" RuntimeVersion="v4.0" xmlns="http://schemas.excel-dna.net/addin/2020/07/dnalibrary">
+  <ExternalLibrary Path="Jetblack.MessageBus.ExcelAddin.dll" ExplicitExports="false" LoadFromBytes="true" Pack="true" IncludePdb="false" />
+  <Reference Path="System.Configuration.dll" Pack="true" />
+  <Reference Path="Newtonsoft.Json.dll" Pack="true" />
+  <Reference Path="JetBlack.MessageBus.Common.dll" Pack="true" />
+  <Reference Path="JetBlack.MessageBus.Messages.dll" Pack="true" />
+  <Reference Path="JetBlack.MessageBus.Adapters.dll" Pack="true" />
+</DnaLibrary>
