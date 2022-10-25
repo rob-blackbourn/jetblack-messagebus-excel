@@ -49,55 +49,63 @@ namespace Jetblack.MessageBus.ExcelAddin
             throw new ArgumentException();
         }
 
+        public static bool IsMissing(this object[] array)
+        {
+            return array.Length == 1 && array[0] is ExcelMissing;
+        }
+
+        public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue defaultValue)
+        {
+            return dict.TryGetValue(key, out TValue value) ? value : defaultValue;
+        }
+
         public static object[,] ToTable(
             this IDictionary<string, IDictionary<string, object>> dataFrame,
-            object[] cols,
-            object[] rows,
+            object[] colKeys,
+            object[] rowKeys,
             bool showColHeaders,
             bool showRowHeaders)
         {
-            var filteredRows = cols.Length == 1 && cols[0] is ExcelMissing
+            // Find the selected rows and columns, or all if unspecified.
+            var rowHeaders = rowKeys.IsMissing()
                 ? dataFrame.Keys.ToArray()
-                : cols.Select(x => Optional(x, string.Empty)).ToArray();
-            var filteredCols = rows.Length == 1 && rows[0] is ExcelMissing
-                ? filteredRows.SelectMany(x => dataFrame[x].Keys).Distinct().ToArray()
-                : rows.Select(x => Optional(x, string.Empty)).ToArray();
+                : rowKeys.Select(x => x.Optional(string.Empty)).ToArray();
+            var colHeaders = colKeys.IsMissing()
+                ? rowHeaders.SelectMany(x => dataFrame[x].Keys).Distinct().ToArray()
+                : colKeys.Select(x => x.Optional(string.Empty)).ToArray();
 
+            // We need an extra row/column if headers are being displayed.
             var colOffset = showRowHeaders ? 1 : 0;
             var rowOffset = showColHeaders ? 1 : 0;
 
-            var table = new object[filteredRows.Length + rowOffset, filteredCols.Length + colOffset];
+            var table = new object[rowHeaders.Length + rowOffset, colHeaders.Length + colOffset];
 
             if (showRowHeaders)
             {
-                for (int r = 0; r < filteredRows.Length; ++r)
-                    table[r + rowOffset, 0] = filteredRows[r];
+                for (int r = 0; r < rowHeaders.Length; ++r)
+                    table[r + rowOffset, 0] = rowHeaders[r];
             }
 
             if (showColHeaders)
             {
-                for (int c = 0; c < filteredCols.Length; ++c)
-                    table[0, c + colOffset] = filteredCols[c];
+                for (int c = 0; c < colHeaders.Length; ++c)
+                    table[0, c + colOffset] = colHeaders[c];
             }
 
             if (showRowHeaders && showColHeaders)
-                table[0, 0] = string.Empty;
+                table[0, 0] = string.Empty; // ExcelMissing.Value displays as 0.
 
-            for (int r = 0; r < filteredRows.Length; ++r)
+            for (int r = 0; r < rowHeaders.Length; ++r)
             {
-                if (!dataFrame.TryGetValue(filteredRows[r], out var row))
+                if (!dataFrame.TryGetValue(rowHeaders[r], out var row))
                 {
-                    for (int c = 0; c < filteredCols.Length; ++c)
+                    for (int c = 0; c < colHeaders.Length; ++c)
                         table[r + rowOffset, c + colOffset] = ExcelMissing.Value;
                 }
                 else
                 {
-                    for (int c = 0; c < filteredCols.Length; ++c)
-                    {
-                        table[r + rowOffset, c + colOffset] = row.TryGetValue(filteredCols[c], out var value)
-                            ? value
-                            : ExcelMissing.Value;
-                    }
+                    for (int c = 0; c < colHeaders.Length; ++c)
+                        table[r + rowOffset, c + colOffset] = row.Get(colHeaders[c], ExcelMissing.Value);
                 }
             }
 

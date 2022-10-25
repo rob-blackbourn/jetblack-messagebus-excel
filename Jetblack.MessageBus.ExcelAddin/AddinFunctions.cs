@@ -4,7 +4,7 @@ namespace Jetblack.MessageBus.ExcelAddin
 {
     public class AddinFunctions
     {
-        public static readonly TopicCache Cache = new TopicCache();
+        internal static readonly TopicCache Cache = new TopicCache();
 
         [ExcelFunction(Name = "mbSUBSCRIBE", Description = "Subscribe to message bus data", Category = "Message Bus")]
         public static object Subscribe(
@@ -14,7 +14,7 @@ namespace Jetblack.MessageBus.ExcelAddin
             [ExcelArgument(Description = "The rows to return or all if omitted")] object[] rows,
             [ExcelArgument(Description = "Show column headers in the returned table")] object showColHeaders,
             [ExcelArgument(Description = "Show row headers in the returned table")] object showRowHeaders,
-            [ExcelArgument(Description = "The server endpoint (e.g. \"example.com:9002\"")] object endpoint)
+            [ExcelArgument(Description = "The server endpoint (e.g. \"tcp://example.com:9002\"")] object endpoint)
         {
             var token = XlCall.RTD(
                 Subscriber.ServerProgId,
@@ -26,6 +26,9 @@ namespace Jetblack.MessageBus.ExcelAddin
             var dataFrame = Cache.Get(token as string);
             if (dataFrame == null)
                 return ExcelError.ExcelErrorValue;
+
+            if (dataFrame.Count == 0)
+                return ExcelError.ExcelErrorGettingData;
 
             return dataFrame.ToTable(
                 columns,
