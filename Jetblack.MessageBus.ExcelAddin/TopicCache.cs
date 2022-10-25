@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
-    public class TopicCache
+    internal class TopicCache
     {
         private readonly IDictionary<int, CachedItem> _cache = new Dictionary<int, CachedItem>();
         private readonly object _gate = new object();
@@ -13,9 +12,7 @@ namespace Jetblack.MessageBus.ExcelAddin
             lock (_gate)
             {
                 if (!_cache.TryGetValue(topicId, out var cachedItem))
-                    _cache.Add(
-                        topicId,
-                        cachedItem = new CachedItem(new Dictionary<string, IDictionary<string, object>>()));
+                    _cache.Add(topicId, cachedItem = new CachedItem());
 
                 return cachedItem.Data;
             }
@@ -67,6 +64,11 @@ namespace Jetblack.MessageBus.ExcelAddin
         {
             public IDictionary<string, IDictionary<string, object>> Data { get; private set; }
             public int UpdateCount { get; private set; } = 0;
+
+            public CachedItem()
+            {
+                Data = new Dictionary<string, IDictionary<string, object>>();
+            }
 
             public CachedItem(IDictionary<string, IDictionary<string, object>> data)
             {
