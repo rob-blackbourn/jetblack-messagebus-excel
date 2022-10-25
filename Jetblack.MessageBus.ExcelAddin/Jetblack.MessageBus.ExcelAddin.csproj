@@ -63,14 +63,15 @@
     <Compile Include="AddinConfig.cs" />
     <Compile Include="AddinFunctions.cs" />
     <Compile Include="CacheableClient.cs" />
+    <Compile Include="EndPoint.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ClientKey.cs" />
     <Compile Include="Subscriber.cs" />
     <Compile Include="SubscriptionKey.cs" />
     <Compile Include="TopicCache.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Jetblack.MessageBus.ExcelAddin-AddIn.dna" />
     <None Include="packages.config" />
     <None Include="Properties\ExcelDna.Build.props" />

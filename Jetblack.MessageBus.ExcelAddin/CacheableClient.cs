@@ -19,9 +19,12 @@ namespace Jetblack.MessageBus.ExcelAddin
         private readonly IDictionary<SubscriptionKey, IDictionary<string, IDictionary<string, object>>> _cache = new Dictionary<SubscriptionKey, IDictionary<string, IDictionary<string, object>>>();
         private readonly object _gate = new object();
 
-        public CacheableClient(string host, int port)
+        public CacheableClient(EndPoint endPoint)
         {
-            _client = Client.SspiCreate(host, port);
+            _client = endPoint.Scheme == ClientScheme.Sspi
+                ? Client.SspiCreate(endPoint.Host, endPoint.Port)
+                : Client.Create(endPoint.Host, endPoint.Port, isSslEnabled: endPoint.Scheme == ClientScheme.Ssl);
+
             _client.OnDataReceived += OnDataReceived;
             _client.OnConnectionChanged += OnConnectionChanged;
             _client.OnHeartbeat += OnHeartbeat;

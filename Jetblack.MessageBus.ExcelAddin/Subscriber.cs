@@ -12,7 +12,7 @@ namespace Jetblack.MessageBus.ExcelAddin
     {
         public const string ServerProgId = "MessageBus.Subscriber";
 
-        private readonly IDictionary<ClientKey, CacheableClient> _clients = new Dictionary<ClientKey, CacheableClient>();
+        private readonly IDictionary<string, CacheableClient> _clients = new Dictionary<string, CacheableClient>();
         private readonly object _gate = new object();
 
         protected override bool ServerStart()
@@ -42,9 +42,7 @@ namespace Jetblack.MessageBus.ExcelAddin
             if (string.IsNullOrWhiteSpace(feed) || string.IsNullOrWhiteSpace(subject))
                 return ExcelError.ExcelErrorValue;
 
-            var endpoint = AddinConfig.MakeEndPoint(topicInfo[2]);
-
-            var client = GetClient(endpoint);
+            var client = GetClient(topicInfo[2]);
             var token = client.RegisterTopic(topic, feed, subject);
 
             return token;
@@ -65,13 +63,15 @@ namespace Jetblack.MessageBus.ExcelAddin
             }
         }
 
-        private CacheableClient GetClient(EndPoint endPoint)
+        private CacheableClient GetClient(string value)
         {
+            var endpoint = AddinConfig.MakeEndPoint(value);
+
             lock (_gate)
             {
-                var key = new ClientKey(endPoint.Host, endPoint.Port);
+                var key = endpoint.ToString();
                 if (!_clients.TryGetValue(key, out var client))
-                    _clients[key] = client = new CacheableClient(endPoint.Host, endPoint.Port);
+                    _clients[key] = client = new CacheableClient(endpoint);
 
                 return client;
             }

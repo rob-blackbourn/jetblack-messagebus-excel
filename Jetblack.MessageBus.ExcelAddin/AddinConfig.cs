@@ -11,60 +11,31 @@ namespace Jetblack.MessageBus.ExcelAddin
         Sspi
     }
 
-    public struct EndPoint
-    {
-        public readonly ClientScheme Scheme;
-        public readonly string Host;
-        public readonly int Port;
-
-        public EndPoint(ClientScheme scheme, string host, int port)
-        {
-            Scheme = scheme;
-            Host = host;
-            Port = port;
-        }
-    }
-
     public class AddinConfig
     {
-        private static EndPoint? _defaultEndPoint;
+        private static EndPoint _defaultEndPoint = null;
 
         public static EndPoint DefaultEndPoint
         {
             get
             {
-                if (!_defaultEndPoint.HasValue)
+                if (_defaultEndPoint == null)
                 {
-                    var schemeAsString = ConfigurationManager.AppSettings["scheme"];
-                    var scheme = !string.IsNullOrWhiteSpace(schemeAsString) && Enum.TryParse<ClientScheme>(schemeAsString, out var schemeAsEnum)
-                        ? schemeAsEnum : ClientScheme.Tcp;
-
-                    var host = ConfigurationManager.AppSettings["host"];
-                    if (string.IsNullOrWhiteSpace(host))
-                        host = Dns.GetHostEntry("LocalHost").HostName;
-
-
-                    var portAsString = ConfigurationManager.AppSettings["port"];
-                    var port = !string.IsNullOrWhiteSpace(portAsString) && int.TryParse(portAsString, out var portAsInt)
-                        ? portAsInt : 9002;
-
-                    _defaultEndPoint = new EndPoint(scheme, host, port);
+                    var endpointAsString = ConfigurationManager.AppSettings["endpoint"];
+                    _defaultEndPoint = endpointAsString != null && EndPoint.TryParse(endpointAsString, out var endpoint)
+                        ? endpoint
+                        : new EndPoint(ClientScheme.Tcp, "LocalHost", 9001);
                 }
 
-                return _defaultEndPoint.Value;
+                return _defaultEndPoint;
             }
         }
 
-        public static EndPoint MakeEndPoint(string endpoint)
+        public static EndPoint MakeEndPoint(string value)
         {
-            if (!string.IsNullOrWhiteSpace(endpoint)
-                && Uri.TryCreate(endpoint, UriKind.Absolute, out var uri)
-                && Enum.TryParse<ClientScheme>(uri.Scheme, true, out var scheme))
-            {
-                return new EndPoint(scheme, uri.Host, uri.Port);
-            }
-
-            return DefaultEndPoint;
+            return value != null && EndPoint.TryParse(value, out var endpoint)
+                ? endpoint
+                : DefaultEndPoint;
         }
     }
 }
