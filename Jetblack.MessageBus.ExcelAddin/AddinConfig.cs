@@ -1,15 +1,25 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Net;
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
+    public enum ClientScheme
+    {
+        Tcp,
+        Ssl,
+        Sspi
+    }
+
     public struct EndPoint
     {
+        public readonly ClientScheme Scheme;
         public readonly string Host;
         public readonly int Port;
 
-        public EndPoint(string host, int port)
+        public EndPoint(ClientScheme scheme, string host, int port)
         {
+            Scheme = scheme;
             Host = host;
             Port = port;
         }
@@ -25,17 +35,20 @@ namespace Jetblack.MessageBus.ExcelAddin
             {
                 if (!_defaultEndPoint.HasValue)
                 {
+                    var schemeAsString = ConfigurationManager.AppSettings["scheme"];
+                    var scheme = !string.IsNullOrWhiteSpace(schemeAsString) && Enum.TryParse<ClientScheme>(schemeAsString, out var schemeAsEnum)
+                        ? schemeAsEnum : ClientScheme.Tcp;
+
                     var host = ConfigurationManager.AppSettings["host"];
                     if (string.IsNullOrWhiteSpace(host))
-                    {
                         host = Dns.GetHostEntry("LocalHost").HostName;
-                    }
+
 
                     var portAsString = ConfigurationManager.AppSettings["port"];
                     var port = !string.IsNullOrWhiteSpace(portAsString) && int.TryParse(portAsString, out var portAsInt)
                         ? portAsInt : 9002;
 
-                    _defaultEndPoint = new EndPoint(host, port);
+                    _defaultEndPoint = new EndPoint(scheme, host, port);
                 }
 
                 return _defaultEndPoint.Value;
@@ -44,13 +57,11 @@ namespace Jetblack.MessageBus.ExcelAddin
 
         public static EndPoint MakeEndPoint(string endpoint)
         {
-            if (!string.IsNullOrWhiteSpace(endpoint))
+            if (!string.IsNullOrWhiteSpace(endpoint)
+                && Uri.TryCreate(endpoint, UriKind.Absolute, out var uri)
+                && Enum.TryParse<ClientScheme>(uri.Scheme, true, out var scheme))
             {
-                var parts = endpoint.Split(':');
-                if (parts.Length == 2 && int.TryParse(parts[1], out var port))
-                {
-                    return new EndPoint(parts[0], port);
-                }
+                return new EndPoint(scheme, uri.Host, uri.Port);
             }
 
             return DefaultEndPoint;
