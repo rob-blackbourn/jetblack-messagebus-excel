@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 using ExcelDna.Integration;
@@ -36,14 +37,13 @@ namespace Jetblack.MessageBus.ExcelAddin
             if (topicInfo.Count != 3)
                 return ExcelError.ExcelErrorValue;
 
-            var feed = topicInfo[0];
-            var subject = topicInfo[1];
+            var topicArgs = TopicArgs.Parse(topicInfo);
 
-            if (string.IsNullOrWhiteSpace(feed) || string.IsNullOrWhiteSpace(subject))
+            if (topicArgs == null)
                 return ExcelError.ExcelErrorValue;
 
-            var client = GetClient(topicInfo[2]);
-            var token = client.RegisterTopic(topic, feed, subject);
+            var client = GetClient(topicArgs.Endpoint);
+            var token = client.RegisterTopic(topic, topicArgs.Feed, topicArgs.Topic);
 
             return token;
         }
@@ -52,14 +52,8 @@ namespace Jetblack.MessageBus.ExcelAddin
         {
             lock ( _gate )
             {
-                foreach (var client in _clients.Values)
-                {
-                    if (client.HasTopic(topic))
-                    {
-                        client.UnregisterTopic(topic);
-                        break;
-                    }
-                }
+                var client = _clients.Values.FirstOrDefault(x => x.HasTopic(topic));
+                client?.UnregisterTopic(topic);
             }
         }
 
@@ -75,6 +69,28 @@ namespace Jetblack.MessageBus.ExcelAddin
                     _clients[key] = client = new CacheableClient(endpoint);
 
                 return client;
+            }
+        }
+
+        private class TopicArgs
+        {
+            public string Feed;
+            public string Topic;
+            public string Endpoint;
+
+            private TopicArgs(string feed, string topic, string endpoint)
+            {
+                Feed = feed;
+                Topic = topic;
+                Endpoint = endpoint;
+            }
+
+            public static TopicArgs Parse(IList<string> topicInfo)
+            {
+                if (string.IsNullOrWhiteSpace(topicInfo[0]) || string.IsNullOrWhiteSpace(topicInfo[1]))
+                    return null;
+
+                return new TopicArgs(topicInfo[0], topicInfo[1], topicInfo[2]);
             }
         }
     }
