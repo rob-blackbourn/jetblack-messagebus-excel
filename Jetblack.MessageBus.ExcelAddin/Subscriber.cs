@@ -16,11 +16,6 @@ namespace Jetblack.MessageBus.ExcelAddin
         private readonly IDictionary<string, CacheableClient> _clients = new Dictionary<string, CacheableClient>();
         private readonly object _gate = new object();
 
-        protected override bool ServerStart()
-        {
-            return true;
-        }
-
         protected override void ServerTerminate()
         {
             lock (_gate)
