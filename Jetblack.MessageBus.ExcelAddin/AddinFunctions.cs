@@ -25,18 +25,15 @@ namespace Jetblack.MessageBus.ExcelAddin
                 topic,
                 endpoint.Optional(string.Empty));
 
-            if (token is string && int.TryParse(((string)token).Split(':').FirstOrDefault(), out var topicId))
-            {
-                var dataFrame = Cache.Get(topicId);
-                System.Diagnostics.Debug.Print("Cached Data");
-                return dataFrame.ToTable(
-                    columns,
-                    rows,
-                    showColHeaders.Check(false),
-                    showRowHeaders.Check(false));
-            }
+            var dataFrame = Cache.Get(token as string);
+            if (dataFrame == null)
+                return ExcelError.ExcelErrorValue;
 
-            return ExcelError.ExcelErrorValue;
+            return dataFrame.ToTable(
+                columns,
+                rows,
+                showColHeaders.Check(false),
+                showRowHeaders.Check(false));
         }
     }
 }

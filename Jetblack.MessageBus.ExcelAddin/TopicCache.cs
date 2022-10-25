@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
@@ -47,6 +48,12 @@ namespace Jetblack.MessageBus.ExcelAddin
             }
         }
 
+        public IDictionary<string, IDictionary<string, object>> Get(string token)
+        {
+            if (token != null && int.TryParse(token.Split(':').FirstOrDefault(), out var topicId))
+                return Get(topicId);
+            return null;
+        }
 
         private class CachedItem
         {
