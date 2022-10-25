@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 
 namespace Jetblack.MessageBus.ExcelAddin
 {

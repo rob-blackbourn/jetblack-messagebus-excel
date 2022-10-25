@@ -13,10 +13,9 @@ namespace Jetblack.MessageBus.ExcelAddin
             lock (_gate)
             {
                 if (!_cache.TryGetValue(topicId, out var cachedItem))
-                {
-                    cachedItem = new CachedItem(new Dictionary<string, IDictionary<string, object>>());
-                    _cache.Add(topicId, cachedItem);
-                }
+                    _cache.Add(
+                        topicId,
+                        cachedItem = new CachedItem(new Dictionary<string, IDictionary<string, object>>()));
 
                 return cachedItem.Data;
             }
@@ -27,14 +26,9 @@ namespace Jetblack.MessageBus.ExcelAddin
             lock (_gate)
             {
                 if (!_cache.TryGetValue(topicId, out var cachedItem))
-                {
-                    cachedItem = new CachedItem(data);
-                    _cache.Add(topicId, cachedItem);
-                }
+                    _cache.Add(topicId, cachedItem = new CachedItem(data));
                 else
-                {
                     cachedItem.Update(data);
-                }
 
                 return cachedItem.UpdateCount;
             }
@@ -50,9 +44,23 @@ namespace Jetblack.MessageBus.ExcelAddin
 
         public IDictionary<string, IDictionary<string, object>> Get(string token)
         {
-            if (token != null && int.TryParse(token.Split(':').FirstOrDefault(), out var topicId))
+            if (TryParseTopicId(token, out var topicId))
                 return Get(topicId);
+
             return null;
+        }
+
+        private static bool TryParseTopicId(string token, out int topicId)
+        {
+            if (token != null)
+            {
+                var index = token.IndexOf(':');
+                if (index != -1 && int.TryParse(token.Substring(0, index), out topicId))
+                    return true;
+            }
+
+            topicId = 0;
+            return false;
         }
 
         private class CachedItem

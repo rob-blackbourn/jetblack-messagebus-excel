@@ -29,9 +29,6 @@ namespace Jetblack.MessageBus.ExcelAddin
 
         protected override object ConnectData(Topic topic, IList<string> topicInfo, ref bool newValues)
         {
-            if (topicInfo.Count != 3)
-                return ExcelError.ExcelErrorValue;
-
             var topicArgs = TopicArgs.Parse(topicInfo);
 
             if (topicArgs == null)
@@ -82,7 +79,9 @@ namespace Jetblack.MessageBus.ExcelAddin
 
             public static TopicArgs Parse(IList<string> topicInfo)
             {
-                if (string.IsNullOrWhiteSpace(topicInfo[0]) || string.IsNullOrWhiteSpace(topicInfo[1]))
+                if (topicInfo.Count != 3
+                    || string.IsNullOrWhiteSpace(topicInfo[0])
+                    || string.IsNullOrWhiteSpace(topicInfo[1]))
                     return null;
 
                 return new TopicArgs(topicInfo[0], topicInfo[1], topicInfo[2]);
