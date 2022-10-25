@@ -8,7 +8,7 @@ namespace Jetblack.MessageBus.ExcelAddin
     {
         public static readonly TopicCache Cache = new TopicCache();
 
-        [ExcelFunction(Name = "rtmbSUBSCRIBE", Description = "Subscribe to message bus data", Category = "Message Bus")]
+        [ExcelFunction(Name = "mbSUBSCRIBE", Description = "Subscribe to message bus data", Category = "Message Bus")]
         public static object Subscribe(
             [ExcelArgument(Description = "The feed name")] string feed,
             [ExcelArgument(Description = "The topic name")] string topic,
