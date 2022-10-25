@@ -1,16 +1,7 @@
-﻿using System;
-using System.Configuration;
-using System.Net;
+﻿using System.Configuration;
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
-    public enum ClientScheme
-    {
-        Tcp,
-        Ssl,
-        Sspi
-    }
-
     public class AddinConfig
     {
         private static EndPoint _defaultEndPoint = null;
@@ -20,22 +11,18 @@ namespace Jetblack.MessageBus.ExcelAddin
             get
             {
                 if (_defaultEndPoint == null)
-                {
-                    var endpointAsString = ConfigurationManager.AppSettings["endpoint"];
-                    _defaultEndPoint = endpointAsString != null && EndPoint.TryParse(endpointAsString, out var endpoint)
-                        ? endpoint
-                        : new EndPoint(ClientScheme.Tcp, "LocalHost", 9001);
-                }
+                    _defaultEndPoint = MakeDefaultEndpoint();
 
                 return _defaultEndPoint;
             }
         }
 
-        public static EndPoint MakeEndPoint(string value)
+        private static EndPoint MakeDefaultEndpoint()
         {
-            return value != null && EndPoint.TryParse(value, out var endpoint)
+            var endpointAsString = ConfigurationManager.AppSettings["endpoint"];
+            return endpointAsString != null && EndPoint.TryParse(endpointAsString, out var endpoint)
                 ? endpoint
-                : DefaultEndPoint;
+                : new EndPoint(ClientScheme.Tcp, "LocalHost", 9001);
         }
     }
 }

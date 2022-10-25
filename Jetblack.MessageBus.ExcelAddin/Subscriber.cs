@@ -65,7 +65,8 @@ namespace Jetblack.MessageBus.ExcelAddin
 
         private CacheableClient GetClient(string value)
         {
-            var endpoint = AddinConfig.MakeEndPoint(value);
+            if (value == null || !EndPoint.TryParse(value, out var endpoint))
+                endpoint = AddinConfig.DefaultEndPoint;
 
             lock (_gate)
             {

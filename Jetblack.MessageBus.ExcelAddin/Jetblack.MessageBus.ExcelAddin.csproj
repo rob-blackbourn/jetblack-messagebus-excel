@@ -63,6 +63,7 @@
     <Compile Include="AddinConfig.cs" />
     <Compile Include="AddinFunctions.cs" />
     <Compile Include="CacheableClient.cs" />
+    <Compile Include="ClientScheme.cs" />
     <Compile Include="EndPoint.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
