@@ -22,6 +22,9 @@ namespace Jetblack.MessageBus.ExcelAddin
         public CacheableClient(string host, int port)
         {
             _client = Client.SspiCreate(host, port);
+            _client.OnDataReceived += OnDataReceived;
+            _client.OnConnectionChanged += OnConnectionChanged;
+            _client.OnHeartbeat += OnHeartbeat;
         }
 
         private void OnHeartbeat(object sender, EventArgs e)
@@ -36,7 +39,7 @@ namespace Jetblack.MessageBus.ExcelAddin
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
-            System.Diagnostics.Debug.Print($"OnDataReceived: ${e.Feed} ${e.Topic}");
+            System.Diagnostics.Debug.Print($"OnDataReceived: {e.Feed} {e.Topic}");
 
             lock(_gate)
             {
@@ -52,6 +55,12 @@ namespace Jetblack.MessageBus.ExcelAddin
                     var json = Encoding.UTF8.GetString(dataPacket.Data);
                     var updates = JsonConvert.DeserializeObject<Dictionary<string, IDictionary<string, object>>>(json);
                     data.Update(updates);
+                }
+
+                foreach (var topic in topics)
+                {
+                    var updateCount = AddinFunctions.Cache.Set(topic.TopicId, data);
+                    topic.UpdateValue($"{topic.TopicId}:{updateCount}");
                 }
             }
         }

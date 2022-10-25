@@ -23,7 +23,7 @@ namespace Jetblack.MessageBus.ExcelAddin
         {
             get
             {
-                if (_defaultEndPoint.HasValue)
+                if (!_defaultEndPoint.HasValue)
                 {
                     var host = ConfigurationManager.AppSettings["host"];
                     if (string.IsNullOrWhiteSpace(host))
@@ -33,7 +33,7 @@ namespace Jetblack.MessageBus.ExcelAddin
 
                     var portAsString = ConfigurationManager.AppSettings["port"];
                     var port = !string.IsNullOrWhiteSpace(portAsString) && int.TryParse(portAsString, out var portAsInt)
-                        ? portAsInt : 0;
+                        ? portAsInt : 9002;
 
                     _defaultEndPoint = new EndPoint(host, port);
                 }
