@@ -2,7 +2,7 @@
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
-    public class EndPoint
+    internal class EndPoint
     {
         public readonly ClientScheme Scheme;
         public readonly string Host;

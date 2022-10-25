@@ -2,7 +2,7 @@
 
 namespace Jetblack.MessageBus.ExcelAddin
 {
-    public class AddinConfig
+    internal class AddinConfig
     {
         private static EndPoint _defaultEndPoint = null;
 

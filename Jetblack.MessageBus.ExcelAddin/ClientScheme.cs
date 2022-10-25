@@ -1,6 +1,6 @@
 ﻿namespace Jetblack.MessageBus.ExcelAddin
 {
-    public enum ClientScheme
+    internal enum ClientScheme
     {
         Tcp,
         Ssl,
